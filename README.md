@@ -1,59 +1,70 @@
-# Monitor-Aware Alt+Tab
+# Tools
 
-Windows Alt+Tab replacement that only shows windows on the monitor where your mouse cursor is.
-
-Built with AutoHotkey v2.
-
-## Features
-
-- **Monitor-aware switching** — Only shows windows on the current monitor (based on mouse cursor position)
-- **Minimized window support** — Detects minimized windows using their original position
-- **App icons** — Extracts and displays 48x48 application icons via WM_GETICON / GetClassLongPtr
-- **Dark theme UI** — Dark background with rounded corners (Windows 11) and semi-transparency
-- **Keyboard navigation** — Alt+Tab to cycle, Shift+Alt+Tab to reverse, Enter to select, Escape to cancel
+A collection of Windows automation scripts built with AutoHotkey v2.
 
 ## Requirements
 
 - Windows 10/11
 - [AutoHotkey v2](https://www.autohotkey.com/)
 
-## Usage
+## Scripts
 
-1. Run `MonitorAltTab.ahk` with AutoHotkey v2
-2. Press **Alt+Tab** — window list appears for the current monitor
-3. Keep holding **Alt**, press **Tab** to cycle through windows
-4. Release **Alt** to activate the selected window
+### MonitorAltTab.ahk — Monitor-Aware Alt+Tab
 
-### Keybindings
+Alt+Tab replacement that only shows windows on the monitor where your mouse cursor is.
+
+**Features:**
+- Only shows windows on the current monitor (based on mouse cursor position)
+- Detects minimized windows using their original position (`GetWindowPlacement`)
+- Displays 48x48 application icons extracted via `WM_GETICON` / `GetClassLongPtr`
+- Dark theme UI with rounded corners (Windows 11) and semi-transparency
+- Keyboard navigation: Tab to cycle, Shift+Tab to reverse, Enter/Alt release to select
+
+**Keybindings:**
 
 | Key | Action |
 |-----|--------|
 | `Alt+Tab` | Open switcher / next window |
 | `Alt+Shift+Tab` | Previous window |
-| `Enter` | Activate selected window |
+| `Enter` or release `Alt` | Activate selected window |
 | `Escape` | Close switcher |
 | Double-click | Activate window |
 
+---
+
+### focus_fullscreen.ahk — Auto-Fullscreen on Focus
+
+Automatically maximizes the active window to fill the entire work area of a specific monitor, then restores it when focus moves away.
+
+**Features:**
+- Targets a specific monitor (default: monitor 3, configurable via `TargetMonitor`)
+- Saves window position before maximizing, restores on defocus
+- If the window is dragged to a different monitor, it restores to original size
+- Exclude list for apps that shouldn't be affected (e.g., KakaoTalk)
+- Configurable polling interval (`PollMs`, default 80ms)
+
+**Configuration (edit the script):**
+
+```ahk
+global TargetMonitor := 3           ; Monitor number to apply auto-fullscreen
+global PollMs := 80                 ; Polling interval in ms
+global ExcludeList := ["KakaoTalk"] ; Excluded process names
+```
+
+**How it works:**
+1. Polls the active window every `PollMs` milliseconds
+2. If the active window is on the target monitor, saves its position and resizes it to fill the monitor's work area
+3. When focus leaves the window (or window moves to another monitor), restores the original position and size
+
+---
+
 ## Auto-start
 
-To run on startup, create a shortcut to `MonitorAltTab.ahk` in:
+To run any script on startup, create a shortcut in:
 
 ```
 shell:startup
 ```
-
-## How it works
-
-1. Intercepts `Alt+Tab` hotkey
-2. Gets the monitor index from the current mouse cursor position
-3. Enumerates all visible windows, filtering by:
-   - `WS_VISIBLE` flag
-   - Excludes `WS_EX_TOOLWINDOW` (tool windows)
-   - Excludes owned windows (popups)
-   - Excludes cloaked windows (virtual desktops)
-4. For minimized windows, uses `GetWindowPlacement` to get the original position
-5. Checks if each window's center point falls within the target monitor bounds
-6. Displays a ListView with app icons in a dark-themed GUI
 
 ## License
 
